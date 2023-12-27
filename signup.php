@@ -9,53 +9,56 @@
     $android = strpos($_SERVER['HTTP_USER_AGENT'], "Android");
 
     // POST 요청이거나 안드로이드에서 요청일 경우
-    if (($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) || $android) {
+    if (($_SERVER['REQUEST_METHOD'] == 'POST') || $android) {
 
-        // POST로 전달된 사용자 입력 데이터 수집
-        $userName = $_POST['username'];
-        $userId = $_POST['userid'];
-        $userPw = $_POST['userpw'];
-        $userGender = $_POST['usergender'];
-        $userClass = $_POST['userclass'];
-        $userEmail = $_POST['useremail'];
-        $userGraduation = $_POST['usergraduation'];
-        $userDream = $_POST['userdream'];
+        // POST 요청으로 전달된 JSON 데이터 수집
+        $data = json_decode(file_get_contents("php://input"), true);
 
         // 입력값이 비어있는지 확인하고 오류 메시지 설정
-        if (empty($userName)) $errMSG = "이름";
-        else if (empty($userId)) $errMSG = "아이디";
-        else if (empty($userPw)) $errMSG = "비밀번호";
-        else if (empty($userGender)) $errMSG = "성별";
-        else if (empty($userClass)) $errMSG = "반";
-        else if (empty($userEmail)) $errMSG = "이메일";
-        else if (empty($userGraduation)) $errMSG = "졸업일";
-        else if (empty($userDream)) $errMSG = "꿈";
+        if (empty($data['username'])) $errMSG = "이름";
+        else if (empty($data['userid'])) $errMSG = "아이디";
+        else if (empty($data['userpw'])) $errMSG = "비밀번호";
+        else if (empty($data['usergender'])) $errMSG = "성별";
+        else if (empty($data['userclass'])) $errMSG = "반";
+        else if (empty($data['useremail'])) $errMSG = "이메일";
+        else if (empty($data['usergraduation'])) $errMSG = "졸업일";
+        else if (empty($data['userdream'])) $errMSG = "꿈";
 
-         // 에러가 없으면 데이터베이스에 삽입
-        if (!isset($errMSG)) {
-            try {
-                $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
-                                       VALUES('$userName', '$userId', '$userPw', '$userGender', '$userClass', '$userEmail', '$userGraduation', '$userDream')");
+    // 에러가 없으면 데이터베이스에 삽입
+    if (!isset($errMSG)) {
+        // 입력값이 비어있는지 확인하고 오류 메시지 설정
+        $userName = $data['username'];
+        $userId = $data['userid'];
+        $userPw = $data['userpw'];
+        $userGender = $data['usergender'];
+        $userClass = $data['userclass'];
+        $userEmail = $data['useremail'];
+        $userGraduation = $data['usergraduation'];
+        $userDream = $data['userdream'];
+        
+        try {
+            $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
+                                VALUES('$userName', '$userId', '$userPw', '$userGender', '$userClass', '$userEmail', '$userGraduation', '$userDream')");
 
-                // 쿼리 실행에 실패하면 예외 발생
-                if (!$stmt) {
-                    throw new Exception('Prepare statement failed: ' . $conn->error);
-                }
-
-                 // 쿼리 실행
-                if ($stmt->execute()) {
-                    $successMSG = "가입 성공";
-                } else {
-                    $errMSG = "가입 실패";
-                }
-            }  catch (PDOException $e) {
-                // 데이터베이스 오류 시 예외 처리
-                die("데이터베이스 오류: " . $e->getMessage());
-            } catch (Exception $e) {
-                // 일반적인 오류 예외 처
-                die("오류: " . $e->getMessage());
+            // 쿼리 실행에 실패하면 예외 발생
+            if (!$stmt) {
+                throw new Exception('Prepare statement failed: ' . $conn->error);
             }
+
+            // 쿼리 실행
+            if ($stmt->execute()) {
+                $successMSG = "가입 성공";
+            } else {
+                $errMSG = "가입 실패";
+            }
+        } catch (PDOException $e) {
+            // 데이터베이스 오류 시 예외 처리
+            die("데이터베이스 오류: " . $e->getMessage());
+        } catch (Exception $e) {
+            // 일반적인 오류 예외 처리
+            die("오류: " . $e->getMessage());
         }
+    }
     }
 ?>
 
