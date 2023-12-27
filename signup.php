@@ -24,10 +24,10 @@
         else if (empty($data['usergraduation'])) $errMSG = "졸업일";
         else if (empty($data['userdream'])) $errMSG = "꿈";
 
-        // 에러가 없으면 데이터베이스에 삽입
-        if (!isset($errMSG)) {
-            //json 에러로그
-            error_log(file_get_contents("php://input"));
+    // 에러가 없으면 데이터베이스에 삽입
+    if (!isset($errMSG)) {
+        //이거 없애도 될듯
+        error_log(file_get_contents("php://input"));
 
             // 입력값이 비어있는지 확인하고 오류 메시지 설정
             $userName = $data['username'];
