@@ -1,5 +1,5 @@
 <?php
-    //모든 에러의 표시 설
+    //모든 에러의 표시 설정
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 
@@ -24,44 +24,44 @@
         else if (empty($data['usergraduation'])) $errMSG = "졸업일";
         else if (empty($data['userdream'])) $errMSG = "꿈";
 
-    // 에러가 없으면 데이터베이스에 삽입
-    if (!isset($errMSG)) {
-        //json 에러로그
-        error_log(file_get_contents("php://input"));
+        // 에러가 없으면 데이터베이스에 삽입
+        if (!isset($errMSG)) {
+            //json 에러로그
+            error_log(file_get_contents("php://input"));
 
-        // 입력값이 비어있는지 확인하고 오류 메시지 설정
-        $userName = $data['username'];
-        $userId = $data['userid'];
-        $userPw = $data['userpw'];
-        $userGender = $data['usergender'];
-        $userClass = $data['userclass'];
-        $userEmail = $data['useremail'];
-        $userGraduation = $data['usergraduation'];
-        $userDream = $data['userdream'];
-        
-        try {
-            $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
-                                VALUES('$userName', '$userId', '$userPw', '$userGender', '$userClass', '$userEmail', '$userGraduation', '$userDream')");
+            // 입력값이 비어있는지 확인하고 오류 메시지 설정
+            $userName = $data['username'];
+            $userId = $data['userid'];
+            $userPw = $data['userpw'];
+            $userGender = $data['usergender'];
+            $userClass = $data['userclass'];
+            $userEmail = $data['useremail'];
+            $userGraduation = $data['usergraduation'];
+            $userDream = $data['userdream'];
+            
+            try {
+                $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
+                                    VALUES('$userName', '$userId', '$userPw', '$userGender', '$userClass', '$userEmail', '$userGraduation', '$userDream')");
 
-            // 쿼리 실행에 실패하면 예외 발생
-            if (!$stmt) {
-                throw new Exception('Prepare statement failed: ' . $conn->error);
+                // 쿼리 실행에 실패하면 예외 발생
+                if (!$stmt) {
+                    throw new Exception('Prepare statement failed: ' . $conn->error);
+                }
+
+                // 쿼리 실행
+                if ($stmt->execute()) {
+                    $successMSG = "가입 성공";
+                } else {
+                    $errMSG = "가입 실패";
+                }
+            } catch (PDOException $e) {
+                // 데이터베이스 오류 시 예외 처리
+                die("데이터베이스 오류: " . $e->getMessage());
+            } catch (Exception $e) {
+                // 일반적인 오류 예외 처리
+                die("오류: " . $e->getMessage());
             }
-
-            // 쿼리 실행
-            if ($stmt->execute()) {
-                $successMSG = "가입 성공";
-            } else {
-                $errMSG = "가입 실패";
-            }
-        } catch (PDOException $e) {
-            // 데이터베이스 오류 시 예외 처리
-            die("데이터베이스 오류: " . $e->getMessage());
-        } catch (Exception $e) {
-            // 일반적인 오류 예외 처리
-            die("오류: " . $e->getMessage());
         }
-    }
     }
 ?>
 
