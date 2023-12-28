@@ -36,10 +36,14 @@
 
                     if ($rowCount > 0) {
                         $successMSG = "로그인 성공";
-                        
+
                         $stmt->bind_result($dbid, $dbUsername, $dbUserId, $dbUserpw, $dbUsergender, $dbUserclass, $dbUseremail, $dbUsergraduation, $dbUserdream); 
                         
                         $stmt->fetch();
+
+                        session_start(); //세션 시작
+
+                        $_SESSION['username'] = $dbUsername;
 
                         $userData = array(
                             'id' => $dbid,
