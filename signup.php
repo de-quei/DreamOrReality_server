@@ -26,34 +26,29 @@
 
     // 에러가 없으면 데이터베이스에 삽입
     if (!isset($errMSG)) {
-        //이거 없애도 될듯
-        error_log(file_get_contents("php://input"));
-
-            // 입력값이 비어있는지 확인하고 오류 메시지 설정
-            $userName = $data['username'];
-            $userId = $data['userid'];
-            $userPw = $data['userpw'];
-            $userGender = $data['usergender'];
-            $userClass = $data['userclass'];
-            $userEmail = $data['useremail'];
-            $userGraduation = $data['usergraduation'];
-            $userDream = $data['userdream'];
+        
+        // 입력값이 비어있는지 확인하고 오류 메시지 설정
+        $userName = $data['username'];
+        $userId = $data['userid'];
+        $userPw = $data['userpw'];
+        $userGender = $data['usergender'];
+        $userClass = $data['userclass'];
+        $userEmail = $data['useremail'];
+        $userGraduation = $data['usergraduation'];
+        $userDream = $data['userdream'];
             
-            try {
-                $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
+        try {
+            $stmt = $conn->prepare("INSERT INTO user(username, userid, userpw, usergender, userclass, useremail, usergraduation, userdream) 
                                     VALUES('$userName', '$userId', '$userPw', '$userGender', '$userClass', '$userEmail', '$userGraduation', '$userDream')");
 
-                // 쿼리 실행에 실패하면 예외 발생
-                if (!$stmt) {
-                    throw new Exception('Prepare statement failed: ' . $conn->error);
-                }
+            // 쿼리 실행에 실패하면 예외 발생
+            if (!$stmt) throw new Exception('Prepare statement failed: ' . $conn->error);
+            
 
-                // 쿼리 실행
-                if ($stmt->execute()) {
-                    $successMSG = "가입 성공";
-                } else {
-                    $errMSG = "가입 실패";
-                }
+            // 쿼리 실행
+            if ($stmt->execute()) $successMSG = "가입 성공";
+            else $errMSG = "가입 실패";
+                
             } catch (PDOException $e) {
                 // 데이터베이스 오류 시 예외 처리
                 die("데이터베이스 오류: " . $e->getMessage());
