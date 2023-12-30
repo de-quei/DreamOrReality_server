@@ -10,35 +10,43 @@ $android = strpos($_SERVER['HTTP_USER_AGENT'], "Android");
 
 // POST 요청이거나 안드로이드에서 요청일 경우
 if (($_SERVER['REQUEST_METHOD'] == 'POST') || $android) {
-    // 폼 데이터 수집
-    $studyTitle = $_POST['title'];
-    $studyTag = $_POST['tag'];
-    $studyContent = $_POST['content'];
-    $studyPeriod = $_POST['period'];
-    $studyPeople = $_POST['people'];
-    $studyLimit = $_POST['limit'];
+    // POST 요청으로 전달된 JSON 데이터 수집
+    $data = json_decode(file_get_contents("php://input"), true);
 
     // 입력값이 비어있는지 확인하고 오류 메시지 설정
-    if (empty($studyTitle)) $errMSG = "제목";
-    else if (empty($studyTag)) $errMSG = "태그";
-    else if (empty($studyContent)) $errMSG = "내용";
-    else if (empty($studyPeriod)) $errMSG = "기간";
-    else if (empty($studyPeople)) $errMSG = "인원";
-    else if (empty($studyLimit)) $errMSG = "제한사항";
+    if (empty($data['title'])) $errMSG = "제목";
+    else if (empty($data['tag'])) $errMSG = "태그";
+    else if (empty($data['content'])) $errMSG = "내용";
+    else if (empty($data['period'])) $errMSG = "기간";
+    else if (empty($data['people'])) $errMSG = "인원";
+    else if (empty($data['limit'])) $errMSG = "제한사항";
 
     // 에러가 없으면 데이터베이스에 삽입
     if (!isset($errMSG)) {
+
+        // 입력값이 비어있는지 확인하고 오류 메시지 설정
+        $studyTitle = $data['title'];
+        $studyTag = $data['tag'];
+        $studyContent = $data['content'];
+        $studyPeriod = $data['period'];
+        $studyPeople = $data['people'];
+        $studyLimit = $data['limit'];
+
         try {
-            $stmt = $conn->prepare("INSERT INTO project(title, tag, content, period, people, `limit`) 
-                                VALUES('$studyTitle', '$studyTag', '$studyContent', '$studyPeriod', '$studyPeople', '$studyLimit')");
+            $stmt = $conn->prepare("INSERT INTO project(`title`, `tag`, `content`, `period`, `people`, `limit`) 
+                        VALUES('$studyTitle', '$studyTag', '$studyContent', '$studyPeriod', '$studyPeople', '$studyLimit')");
+
 
             // 쿼리 실행에 실패하면 예외 발생
             if (!$stmt) throw new Exception('Prepare statement failed: ' . $conn->error);
+
 
             // 쿼리 실행
             if ($stmt->execute()) $successMSG = "등록 성공";
             else $errMSG = "등록 실패";
 
+            // Statement 닫기
+            $stmt->close();
         } catch (PDOException $e) {
             // 데이터베이스 오류 시 예외 처리
             die("데이터베이스 오류: " . $e->getMessage());
